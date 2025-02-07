@@ -1,0 +1,89 @@
+{
+    "@type": "blocks.blockSignatures",
+    "id": {
+        "@type": "ton.blockIdExt",
+        "workchain": -1,
+        "shard": "-9223372036854775808",
+        "seqno": 27689757,
+        "root_hash": "1CsSVP1fQKjzWRMnIwYowp4Cu8/ywtWP/iGzOd+keH8=",
+        "file_hash": "ZPtN6AI6NHPAcodaYo6Gy90LJhcVLRoL3u5QJ2Sh8m4="
+    },
+    "signatures": [
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "EsNP2gtxDaVc3a+51P8ORIAAksV/s/l24UuQ7+F/nuU=",
+            "signature": "CkNWv6RVRhQjzJeP/s1enGwVdmCZFHaVa6RZr1KLDpZe0e2mu93VjVtgivuLWgE8eA45FsAamcQBxAQFz2PyAA=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "kwlsFZrkTMCPA2EvRIpPaoT7rl5+BSg2xY+0TFTYNds=",
+            "signature": "lzdBJ3qVvH9L4tz4y3Dr75mygMKrrvlb9SXA/RT3vGEjFn9yxJ+Mc4GArk5OGvv7u+bzXqik1Njvknvt3VpaBA=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "oKHJ2f3twYaXYWvnCaEgvp5E7QrD6PCHzBMGyJaAYFU=",
+            "signature": "aR084yMkajtpDG+z2KG3dx+cutfrBx7dLbgCHROk0KJ1+RJHUNx0N+t72dKA4ny0qVKxB1mEGRtJ9OgwmXWcAQ=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "F4JPinIv86hrCCh7gyg0sMxu8KqLnQsNSwfqMIigzRk=",
+            "signature": "zJJZrxFelvxjiA1PK39jSjqmp6Ysx33cnCwQ99nfiMmDSrWA8GvdSMr9rzr4E4rpbKHLSWqfQgLtoJg4Pt7RAw=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "UveeEiVleWWuV39I/FaRWSUABv7rLe9ndBl5xcdLOp8=",
+            "signature": "7cnEiJDXROP6ADAU76Ky7rKDZa3JL4MGN7xy4UhlLTg40WltorDlVLYIeaUFseKpB1zVdbuJBz4Da7eBFlmrDg=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "6MLYtFyNNSTAG8OR/LBfwLzlijvxKWCkTz83QwZL3jo=",
+            "signature": "Ebxr74PDO8eHH00/orxXU9wgRHe7aNIdEErT6GbwFyp0A157KX4YM7qKChgkW8CYrEt83+2DagqPLsj/Zct3AQ=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "pde/zTajMjTwqc+vzi/lwfBncbDMizvDE1TqAT9z15I=",
+            "signature": "LOQ5wR2Nm16qt2yrppZNPKnVBt+ecfA3dTKAwQphJPz0t1if7OA5Zu76jhO4hV/saB/T290AKZFXQ6qA7xtlCQ=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "7yrSE1/IpNxFc7L2vbUNTnDRGxx7KSpShAYaPECUkX0=",
+            "signature": "aqEVrBVc1fq+LXpOHINMxWkGd6KKfisBDt1VjQWlwDRjHQpp1dx40uqPyDvaQRmq/5MRjuWJ8Y0k+VL5vbqWCg=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "/9QbEJhuA1sKNihK3Z2M4gheEnOWQIFP2r+GCLiMRYM=",
+            "signature": "QcXJvXo3e3wEl0ulBg6FbxDE+WuDLT4sZYxsn3qGATMQ5PkEbg/+nxN33QwKR+PfDjLatFmkzFLglHi51sgJBA=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "7N6BhCVW4lLbZm/i0GqtRhVmCAuGn61FO36JF4NfWoM=",
+            "signature": "G5pD8dz/w+LcbuCufzNkUlBqTEck+S/8ZJaR2yITSOeo+cwi5jMPIjRfzGUx+mzkouhKDYWF91o8cYG2K4cWDA=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "nQo6lByYVhml865djCTZ5NINewpaynfw4WBBVLP0PvQ=",
+            "signature": "NoLq4eC5jRe26DjGIYJ7s+GlnoQhP46Oj7su5FQaaDPWnq7tITUyy0NiQVKjOJ65YIO4NO7mbTSJVZWyxZbwCA=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "Kz3orXRWtT0tIg9L7Is4bn6QOnf85GniVciKR1Oc8fc=",
+            "signature": "S3AzlLosW+zmHXR6OTANWaAQ3Fw/wyO7L02jtleV3k54JKb03tmdOgKl+WMn0WpFJpNvIPVw+i7K+zF8ILVkBQ=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "+Vq49ne9rN1pKXn/cZVNyC7ic1WXIZhLe3JXGWg+OFc=",
+            "signature": "jqm1ZQg6rnnim9xjyLQKeqEdEPgDAicJ8+2d/WJU/PgjZMO9wIsj3wBUxjpceaEXt3XtN3H2t6Nou5kElN9MDw=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "HncLJSfiGwMy06oYx9Ge3WiSCZcpTlNawCC44q/Bbao=",
+            "signature": "fil3Yo/Pbikt5xVL/DtnizUOyLJXCzkK2aI8GLAybbt1AR0FIgDIuvnaVufvDtz+zvBYcXu4KyYE7SOZ30WMAg=="
+        },
+        {
+            "@type": "blocks.signature",
+            "node_id_short": "R/Hi932OqOLjcb53ylUckDIiuKUI8AhoKubPjSgQWWM=",
+            "signature": "EBBzr3rUzSb7NglTwVQ2HW7JYDQs9vlD6e+BdRlJV8+ceaaoyASsfImvycgPZBtGeNOx5/fvB1Fv9NpEJCgVCw=="
+        }
+    ],
+    "@extra": "1738404328.205059:4:0.971524520856546"
+}
