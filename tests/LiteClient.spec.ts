@@ -10,14 +10,26 @@ import { randomInt } from 'node:crypto';
 import {
     createBlockAndFileHash,
     createCheckBlock,
+    createConfigProofWithHeader,
+    createHeaderProof,
     createNewKeyBlock,
     createSignatureMap,
     createValidatorSet,
 } from '../src/structs';
+import { sha256 } from '@ton/crypto';
 
-async function loadBlockAndFileHash(blockFile: string): Promise<BlockAndFileHash> {
+async function loadBlockAndFileHashWithValidators(blockFile: string): Promise<BlockAndFileHash> {
     const nextBlock = await readTestData(blockFile);
-    return await createBlockAndFileHash(nextBlock);
+    const fileHash = await sha256(nextBlock);
+    const merkleProof = createConfigProofWithHeader(Cell.fromBoc(nextBlock)[0]);
+    return await createBlockAndFileHash(merkleProof, fileHash);
+}
+
+async function loadBlockAndFileHashWithHeader(blockFile: string): Promise<BlockAndFileHash> {
+    const nextBlock = await readTestData(blockFile);
+    const fileHash = await sha256(nextBlock);
+    const merkleProof = createHeaderProof(Cell.fromBoc(nextBlock)[0]);
+    return await createBlockAndFileHash(merkleProof, fileHash);
 }
 
 async function loadSignatureMap(signatureFile: string) {
@@ -26,18 +38,19 @@ async function loadSignatureMap(signatureFile: string) {
 }
 
 async function loadNewKeyBlock(blockFile: string, signatureFile: string, queryId: number) {
-    const blockAndFileHash = await loadBlockAndFileHash(blockFile);
+    const blockAndFileHash = await loadBlockAndFileHashWithValidators(blockFile);
     const signatureMap = await loadSignatureMap(signatureFile);
     return createNewKeyBlock(BigInt(queryId), blockAndFileHash, signatureMap);
 }
 
 async function loadCheckBlock(blockFile: string, signatureFile: string, queryId: number) {
-    const blockAndFileHash = await loadBlockAndFileHash(blockFile);
+    const blockAndFileHash = await loadBlockAndFileHashWithHeader(blockFile);
     const signatureMap = await loadSignatureMap(signatureFile);
     return createCheckBlock(BigInt(queryId), blockAndFileHash, signatureMap);
 }
 
 export const testBlock = (seqno: number, isKey: boolean) => ({
+    header: `testnet-${seqno}.header`,
     block: `testnet-${seqno}${isKey ? '-key' : ''}.block`,
     signatures: `testnet-${seqno}${isKey ? '-key' : ''}.signatures.json`,
     seqno: seqno,

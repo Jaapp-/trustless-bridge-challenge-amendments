@@ -12,6 +12,7 @@ import { parseBlock, parseProofTransactions } from '../src/parser';
 import {
     createBlockAndFileHash,
     createCheckTransaction,
+    createHeaderProof,
     createProvableBlock,
     createSignatureMap,
     createValidatorSet,
@@ -19,6 +20,7 @@ import {
 import { LiteClient, loadCorrect, SignatureMap } from '../wrappers/LiteClient';
 import { testBlock } from './LiteClient.spec';
 import { liteServer_blockTransactions } from 'ton-lite-client/dist/schema';
+import { sha256 } from '@ton/crypto';
 
 const getTestCheckTransaction = async (seqno: number, isKey: boolean) => {
     const extra = isKey ? '-key' : '';
@@ -26,14 +28,18 @@ const getTestCheckTransaction = async (seqno: number, isKey: boolean) => {
     const signatureMap: SignatureMap = createSignatureMap(
         await readTestDataJson(`testnet-${seqno}${extra}.signatures.json`),
     );
-    const bnfh = await createBlockAndFileHash(nextBlock);
+
+    const fileHash = await sha256(nextBlock);
+    const merkleProof = createHeaderProof(Cell.fromBoc(nextBlock)[0]);
+    const bnfh = await createBlockAndFileHash(merkleProof, fileHash);
     const provableBlock = createProvableBlock(bnfh, signatureMap);
+
     const transactionResponse: liteServer_blockTransactions = await readTestDataJson(
         `testnet-${seqno}.transactions.json`,
     );
     const [transactionProof] = Cell.fromBoc(transactionResponse.proof);
     const transactions = parseProofTransactions(transactionProof.refs[0]);
-    return createCheckTransaction(transactions[0], Cell.fromBoc(nextBlock)[0], provableBlock);
+    return createCheckTransaction(transactions[0], transactionProof, provableBlock);
 };
 
 describe('TransactionChecker', () => {
@@ -45,13 +51,13 @@ describe('TransactionChecker', () => {
     beforeEach(async () => {
         blockchain = await Blockchain.create();
 
-        const keyBlock = testBlock(27683262, true);
+        const keyBlock = testBlock(27885754, true);
         const initBlock = await readTestData(keyBlock.block);
         const parsedInit = parseBlock(initBlock);
         const initValidators = await createValidatorSet(parsedInit);
         deployer = await blockchain.treasury('deployer');
 
-        liteClient = blockchain.openContract(await LiteClient.fromInit(-3n, 27683262n, initValidators));
+        liteClient = blockchain.openContract(await LiteClient.fromInit(-3n, 27885754n, initValidators));
         const lcDeployResult = await liteClient.send(
             deployer.getSender(),
             {
@@ -95,7 +101,7 @@ describe('TransactionChecker', () => {
 
     it('should check a transaction', async () => {
         const sender = await blockchain.treasury('sender');
-        const checkTransaction = await getTestCheckTransaction(27683263, false);
+        const checkTransaction = await getTestCheckTransaction(27885755, false);
 
         const response: SendMessageResult = await transactionChecker.send(
             sender.getSender(),
@@ -134,7 +140,7 @@ describe('TransactionChecker', () => {
 
     it('should reject an invalid transaction', async () => {
         const sender = await blockchain.treasury('sender');
-        const checkTransaction = await getTestCheckTransaction(27689757, true); // Block of later epoch
+        const checkTransaction = await getTestCheckTransaction(27885753, false); // Block of earlier epoch
         const response: SendMessageResult = await transactionChecker.send(
             sender.getSender(),
             { value: toNano('0.5') },

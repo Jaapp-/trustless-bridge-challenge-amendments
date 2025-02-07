@@ -1,5 +1,13 @@
 # TON Trustless Bridge Challenge
 
+## Edit
+
+At time of submission I did not realize `XCTOS`'s existence. Furthermore, the implementation did not protect against
+duplicate signatures. This Edit fixes both of these issues. Some new, much more efficient, transactions can be seen in
+[log-testnet.md](./log-testnet.md).
+
+## Overview
+
 TACT implementation of LiteClient and TransactionChecker for the [Trustless Bridge Challenge](https://contest.com/docs/TrustlessBridgeChallenge).
 
 ## Project structure

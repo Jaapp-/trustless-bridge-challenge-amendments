@@ -4,13 +4,19 @@ import { LiteClient as TsLiteClient } from 'ton-lite-client';
 import { getClient } from './fetchTestData';
 import { getLastMcBlockId, lookupFullBlock } from '../src/lite-client';
 import { requireAddress } from '../src/ui';
-import { beginCell, OpenedContract, toNano } from '@ton/core';
+import { beginCell, Cell, OpenedContract, toNano } from '@ton/core';
 import { liteServer_BlockData } from 'ton-lite-client/dist/schema';
 import { parseBlock } from '../src/parser';
-import { createBlockAndFileHash, createNewKeyBlock, createSignatureMap } from '../src/structs';
+import {
+    createBlockAndFileHash,
+    createConfigProofWithHeader,
+    createNewKeyBlock,
+    createSignatureMap,
+} from '../src/structs';
 import { getMasterchainBlockSignatures } from '../src/toncenter';
 import { opposingNetwork } from '../src/util';
 import { createSenderProvider } from '../src/deploy';
+import { sha256 } from '@ton/crypto';
 
 export async function run(provider: NetworkProvider, args: string[]) {
     const address = requireAddress(args[0], __filename);
@@ -71,7 +77,10 @@ const sync = async (
         let signatures = await retryGetSignatures(seqno, provider);
 
         const signatureMap = createSignatureMap(signatures);
-        const blockAndFileHash = await createBlockAndFileHash(block.data);
+        const blockAndFileHash = await createBlockAndFileHash(
+            createConfigProofWithHeader(Cell.fromBoc(block.data)[0]),
+            await sha256(block.data),
+        );
 
         provider.ui().write(`[${i + 1}/${keys.length}] Updating LiteClient to ${seqno}`);
 

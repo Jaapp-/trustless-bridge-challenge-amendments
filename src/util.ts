@@ -35,32 +35,6 @@ export const bufferToBigInt = (buffer: Buffer) => {
     return BigInt(`0x${buffer.toString('hex')}`);
 };
 
-export const toPruned = (cell: Cell) => {
-    const hash = cell.hash();
-    return beginCell()
-        .storeUint(1, 8)
-        .storeUint(1, 8)
-        .storeBuffer(hash, 256 / 8)
-        .storeUint(cell.depth(), 16)
-        .endCell({ exotic: true });
-};
-
-/**
- * Because we can't send a pruned branch directly (root cell can't be level 0), we wrap it in a merkle proof.
- *
- * @param cell pruned branch cell to wrap
- */
-export const singlePrunedBranchCell = (cell: Cell) => {
-    const builder = beginCell();
-    builder.storeUint(0x03, 8);
-    const vHash = new BitBuilder();
-    vHash.writeBuffer(cell.hash(0));
-    builder.storeBits(vHash.build());
-    builder.storeUint(cell.depth(0), 16);
-    builder.storeRef(cell);
-    return builder.endCell({ exotic: true });
-};
-
 export const opposingNetwork = (network: Network): Network => {
     switch (network) {
         case 'custom':

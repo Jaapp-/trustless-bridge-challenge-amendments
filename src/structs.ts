@@ -15,6 +15,7 @@ import { beginCell, Cell, Dictionary } from '@ton/core';
 import { sha256 } from '@ton/crypto';
 import { BlockSignatures } from './toncenter';
 import { CheckTransaction, ProvableBlock, storeProvableBlock } from '../wrappers/TransactionChecker';
+import { createMerkleProof, pruneAllBranchesExcept, pruneAllBranchesExceptArray, withRefAtIndex } from './merkleProof';
 
 const createValidator = async (v: ValidatorDescr_validator_addr): Promise<Validator> => {
     return {
@@ -71,13 +72,11 @@ export const createSignatureMap = (signatures: BlockSignatures): SignatureMap =>
     };
 };
 
-export const createBlockAndFileHash = async (bytes: Buffer): Promise<BlockAndFileHash> => {
-    const fileHash = await sha256(bytes);
-    const [rootCell] = Cell.fromBoc(bytes);
+export const createBlockAndFileHash = async (cell: Cell, fileHash: Buffer): Promise<BlockAndFileHash> => {
     return {
         $$type: 'BlockAndFileHash',
         fileHash: bufferToBigInt(fileHash),
-        block: rootCell,
+        block: cell,
     };
 };
 
@@ -147,4 +146,17 @@ export const createCheckTransaction = (
         proof: proof,
         current_block: pbCell.endCell(),
     };
+};
+
+export const createHeaderProof = (block: Cell): Cell => {
+    return createMerkleProof(pruneAllBranchesExcept(block, 0));
+};
+
+export const createConfigProofWithHeader = (block: Cell): Cell => {
+    const extra = block.refs[3];
+    const mcExtra = extra.refs[3];
+    const mcExtraPruned = pruneAllBranchesExcept(mcExtra, mcExtra.refs.length - 1);
+    const extraPruned = pruneAllBranchesExcept(withRefAtIndex(extra, 3, mcExtraPruned), 3);
+    const blockPruned = pruneAllBranchesExceptArray(withRefAtIndex(block, 3, extraPruned), [0, 3]);
+    return createMerkleProof(blockPruned);
 };

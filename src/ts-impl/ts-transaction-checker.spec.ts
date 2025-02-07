@@ -12,6 +12,7 @@ import { TsTransactionChecker } from './ts-transaction-checker';
 import { SignatureMap } from '../../wrappers/LiteClient';
 import { liteServer_blockTransactions } from 'ton-lite-client/dist/schema';
 import { Cell } from '@ton/core';
+import { sha256 } from '@ton/crypto';
 
 describe('ts-transaction-checker', () => {
     it('should validate a transaction', async () => {
@@ -23,7 +24,7 @@ describe('ts-transaction-checker', () => {
         const signatureMap: SignatureMap = createSignatureMap(
             await readTestDataJson('testnet-27683263.signatures.json'),
         );
-        const bnfh = await createBlockAndFileHash(nextBlock);
+        const bnfh = await createBlockAndFileHash(Cell.fromBoc(nextBlock)[0], await sha256(nextBlock));
         const provableBlock = createProvableBlock(bnfh, signatureMap);
         const transactionResponse: liteServer_blockTransactions = await readTestDataJson(
             'testnet-27683263.transactions.json',

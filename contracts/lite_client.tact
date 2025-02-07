@@ -4,6 +4,7 @@ import "./common/block_and_filehash.tact";
 import "./common/signature_map.tact";
 import "./common/check_block.tact";
 import "./common/slice_load_nth_ref.tact";
+import "./common/begin_parse_exotic.tact";
 
 message(0x11a78ffe) NewKeyBlock {
     query_id: Int as uint64;
@@ -92,14 +93,18 @@ contract LiteClient with Deployable {
         .asSlice();
         let requiredWeight = self.validatorSet.total_weight * 2 / 3;
         let weight = 0;
+        let seen: map<Int as uint256, Bool> = emptyMap();
         foreach (idx, sig in signatureMap.signatures) {
             let validatorOpt = self.validatorSet.validators.get(sig.node_id_short);
             if (validatorOpt != null) {
                 let validator = validatorOpt!!;
-                if (checkDataSignature(message, sig.signature.asSlice(), validator.pub_key)) {
-                    weight += validator.weight;
-                    if (weight >= requiredWeight) {
-                        return true;
+                if (!seen.exists(validator.pub_key)) {
+                    seen.set(validator.pub_key, true);
+                    if (checkDataSignature(message, sig.signature.asSlice(), validator.pub_key)) {
+                        weight += validator.weight;
+                        if (weight >= requiredWeight) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -166,12 +171,14 @@ contract LiteClient with Deployable {
     receive(msg: NewKeyBlock) {
         let blockAndFileHash = BlockAndFileHash.fromCell(msg.block);
         let signatureMap = SignatureMap.fromCell(msg.signatures);
-        let rootHash = blockAndFileHash.block.hash();
-        let new_seq_no = self.validateMcBlock(blockAndFileHash.block, true);
+        let proofCell = blockAndFileHash.block.beginParseExotic();
+        let blockCell = proofCell.slice.loadRef();
+        let rootHash = blockCell.hash0();
+        let new_seq_no = self.validateMcBlock(blockCell, true);
         require(self.validateSignatures(signatureMap, blockAndFileHash, rootHash), "Expect valid signature");
 
         self.seqno = new_seq_no;
-        self.loadValidators(blockAndFileHash.block);
+        self.loadValidators(blockCell);
 
         self.notify(Ok{
             query_id: msg.query_id,
@@ -182,8 +189,10 @@ contract LiteClient with Deployable {
     receive(msg: CheckBlock) {
         let blockAndFileHash = BlockAndFileHash.fromCell(msg.block);
         let signatureMap = SignatureMap.fromCell(msg.signatures);
-        let rootHash = blockAndFileHash.block.hash();
-        self.validateMcBlock(blockAndFileHash.block, false);
+        let proofCell = blockAndFileHash.block.beginParseExotic();
+        let blockCell = proofCell.slice.loadRef();
+        let rootHash = blockCell.hash0();
+        self.validateMcBlock(blockCell, false);
         require(self.validateSignatures(signatureMap, blockAndFileHash, rootHash), "Expect valid signature");
 
         self.notify(Correct{

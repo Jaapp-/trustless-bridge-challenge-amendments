@@ -4,10 +4,11 @@ import { beginCell, Cell, toNano } from '@ton/core';
 import {
     createBlockAndFileHash,
     createCheckTransaction,
+    createHeaderProof,
     createProvableBlock,
     createSignatureMap,
 } from '../src/structs';
-import { lookupFullBlock } from '../src/lite-client';
+import { listBlockTransactions, lookupFullBlock } from '../src/lite-client';
 import { getMasterchainBlockSignatures } from '../src/toncenter';
 import { requireAddress, requireSeqNo } from '../src/ui';
 import { opposingNetwork } from '../src/util';
@@ -15,6 +16,7 @@ import { storeCheckTransaction } from '../wrappers/TransactionChecker';
 import { parseProofTransactions } from '../src/parser';
 import { loadTransaction } from '../src/gen/block';
 import { createSenderProvider } from '../src/deploy';
+import { sha256 } from '@ton/crypto';
 
 const ARGUMENTS = '<address> <seqno>';
 
@@ -26,7 +28,10 @@ export async function run(provider: NetworkProvider, args: string[]) {
     const block = await lookupFullBlock(client, seqno);
     const [rootCell] = Cell.fromBoc(block.data);
     const signatures = await getMasterchainBlockSignatures(opposingNetwork(provider.network()), seqno);
-    const blockAndFileHash = await createBlockAndFileHash(block.data);
+    const blockAndFileHash = await createBlockAndFileHash(
+        createHeaderProof(Cell.fromBoc(block.data)[0]),
+        await sha256(block.data),
+    );
     const signatureMap = createSignatureMap(signatures);
     const provableBlock = createProvableBlock(blockAndFileHash, signatureMap);
 
@@ -36,9 +41,13 @@ export async function run(provider: NetworkProvider, args: string[]) {
         return `${t.hash(0).toString('hex')}: to=${parsed.account_addr} lt=${parsed.lt}`;
     });
 
+    const transactionsProof = await listBlockTransactions(client, block.id);
+
     const sender = await createSenderProvider(provider);
     const builder = beginCell();
-    storeCheckTransaction(createCheckTransaction(transaction, rootCell, provableBlock))(builder);
+    storeCheckTransaction(createCheckTransaction(transaction, Cell.fromBoc(transactionsProof.proof)[0], provableBlock))(
+        builder,
+    );
     await sender.sendTransaction(
         address,
         provider.network() === 'custom' ? toNano('5') : toNano('0.1'),

@@ -4,6 +4,7 @@ import "./common/block_and_filehash.tact";
 import "./common/signature_map.tact";
 import "./common/check_block.tact";
 import "./common/slice_load_nth_ref.tact";
+import "./common/begin_parse_exotic.tact";
 
 const MAX_PENDING_REQUESTS: Int = 100;
 
@@ -43,12 +44,14 @@ contract TransactionChecker with Deployable {
     }
 
     fun findTrustedTransaction(root: Cell, transactionHash: Int): Bool {
-        let slice = root.asSlice();
-        // If we were iterating on the proof instead of the full block, we would check if the cell is a pruned branch
-        // cell
-        if (slice.bits() >= 4 && slice.preloadUint(4) == 0b0111) {
-            return slice.hash() == transactionHash;
+        let cell = root.beginParseExotic();
+        // Check if the pruned branch cell's hash equals the transaction we're looking for
+        if (cell.isExotic) {
+            cell.slice.skipBits(16);
+            let hash  = cell.slice.loadUint(256);
+            return hash == transactionHash;
         }
+        let slice = root.asSlice();
 
         repeat (slice.refs()) {
             if (self.findTrustedTransaction(slice.loadRef(), transactionHash)) {
@@ -87,12 +90,14 @@ contract TransactionChecker with Deployable {
     receive(msg: CheckTransaction) {
         let provableBlock = ProvableBlock.fromCell(msg.current_block);
         let blockAndFileHash = BlockAndFileHash.fromCell(provableBlock.block_and_filehash);
+        let headerProofCell = blockAndFileHash.block.beginParseExotic();
+        let headerCell = headerProofCell.slice.loadRef();
+        let transactionMerkleProof = msg.proof.beginParseExotic();
+        let transactionProof = transactionMerkleProof.slice.loadRef();
 
-        // blockAndFileHash.block and msg.proof are both the full block due to the exotic cell parsing issue.
-        // We keep logic here and transmit both blocks to showcase correctness, even if we were able to
-        // parse the pruned versions of the block.
-        require(blockAndFileHash.block.hash() == msg.proof.hash(), "Expect block and proof hashes match");
-        require(self.validateTransaction(msg.transaction, msg.proof), "Expect valid transaction");
+        // We fixed the logic, so that we actually compare the pruned proofs
+        require(headerCell.hash0() == transactionProof.hash0(), "Expect block and proof hashes match");
+        require(self.validateTransaction(msg.transaction, transactionProof), "Expect valid transaction");
         self.requestCheckBlock(provableBlock, msg.transaction);
     }
 

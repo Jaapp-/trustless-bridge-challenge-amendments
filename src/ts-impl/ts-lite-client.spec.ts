@@ -9,6 +9,8 @@ import {
     createSignatureMap,
     createValidatorSet,
 } from '../structs';
+import { sha256 } from '@ton/crypto';
+import { Cell } from '@ton/core';
 
 describe('ts-lite-client', () => {
     it('should validate a new key block', async () => {
@@ -19,9 +21,10 @@ describe('ts-lite-client', () => {
         const liteClient = new TsLiteClient(-3, 27689041, initValidators);
 
         const signatures: BlockSignatures = await readTestDataJson('testnet-27689757-key.signatures.json');
+        const fileHash = await sha256(nextBlock);
         const newKeyBlock = createNewKeyBlock(
             0n,
-            await createBlockAndFileHash(nextBlock),
+            await createBlockAndFileHash(Cell.fromBoc(nextBlock)[0], fileHash),
             createSignatureMap(signatures),
         );
 
@@ -37,7 +40,7 @@ describe('ts-lite-client', () => {
 
         const checkBlock = createCheckBlock(
             0n,
-            await createBlockAndFileHash(nonKeyBlock),
+            await createBlockAndFileHash(Cell.fromBoc(nonKeyBlock)[0], await sha256(nonKeyBlock)),
             createSignatureMap(signatures),
         );
 
