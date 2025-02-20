@@ -46,6 +46,9 @@ contract TransactionChecker with Deployable {
     fun findTrustedTransaction(root: Cell, transactionHash: Int): Bool {
         let cell = root.beginParseExotic();
         // Check if the pruned branch cell's hash equals the transaction we're looking for
+        //
+        // TODO: This is insufficient as it allows parsing of transaction message contents within a non-pruned transaction
+        // Parse entire map properly instead
         if (cell.isExotic) {
             cell.slice.skipBits(16);
             let hash  = cell.slice.loadUint(256);
